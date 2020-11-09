@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import json
 import xlsxwriter
 
@@ -5,7 +6,7 @@ import requests
 from bs4 import BeautifulSoup
 
 
-PAGES_COUNT = 10
+PAGES_COUNT = 2
 OUT_FILENAME = 'out.json'
 OUT_XLSX_FILENAME = 'out.xlsx'
 
@@ -51,12 +52,18 @@ def get_soup(url, **kwargs):
 
 
 def crawl_products(pages_count):
+    """
+    Собирает со страниц с 1 по pages_count включительно ссылки на товары.
+    
+    :param pages_count:     номер последней страницы с товарами.
+    :return:                список URL товаров.
+    """
     urls = []
     fmt = 'https://parsemachine.com/sandbox/catalog/?page={page}'
-    
+
     for page_n in range(1, 1 + pages_count):
         print('page: {}'.format(page_n))
-        
+
         page_url = fmt.format(page=page_n)
         soup = get_soup(page_url)
         if soup is None:
@@ -66,16 +73,24 @@ def crawl_products(pages_count):
             href = tag.attrs['href']
             url = 'https://parsemachine.com{}'.format(href)
             urls.append(url)
-        
+
     return urls
 
 
 def parse_products(urls):
+    """
+    Парсинг полей:
+        название, цена и таблица характеристик
+    по каждому товару.
+
+    :param urls:            список URL на карточки товаров.
+    :return:                массив спарсенных данных по каждому из товаров.
+    """
     data = []
-    
+
     for url in urls:
         print('\tproduct: {}'.format(url))
-        
+
         soup = get_soup(url)
         if soup is None:
             break
@@ -95,7 +110,7 @@ def parse_products(urls):
             'url': url,
         }
         data.append(item)
-        
+
     return data
 
 
