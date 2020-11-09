@@ -6,7 +6,7 @@ import requests
 from bs4 import BeautifulSoup
 
 
-PAGES_COUNT = 2
+PAGES_COUNT = 10
 OUT_FILENAME = 'out.json'
 OUT_XLSX_FILENAME = 'out.xlsx'
 
@@ -54,7 +54,7 @@ def get_soup(url, **kwargs):
 def crawl_products(pages_count):
     """
     Собирает со страниц с 1 по pages_count включительно ссылки на товары.
-    
+
     :param pages_count:     номер последней страницы с товарами.
     :return:                список URL товаров.
     """
