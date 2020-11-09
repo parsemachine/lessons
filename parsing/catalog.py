@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import json
+import xlsxwriter
 
 import requests
 from bs4 import BeautifulSoup
@@ -7,6 +8,38 @@ from bs4 import BeautifulSoup
 
 PAGES_COUNT = 10
 OUT_FILENAME = 'out.json'
+OUT_XLSX_FILENAME = 'out.xlsx'
+
+
+def dump_to_json(filename, data, **kwargs):
+    kwargs.setdefault('ensure_ascii', False)
+    kwargs.setdefault('indent', 1)
+    
+    with open(OUT_FILENAME, 'w') as f:
+        json.dump(data, f, **kwargs)
+
+
+def dump_to_xlsx(filename, data):
+    if not len(data):
+        return None
+    
+    with xlsxwriter.Workbook(filename) as workbook:
+        ws = workbook.add_worksheet()
+        bold = workbook.add_format({'bold': True})
+
+        headers = ['Название товара', 'Цена', 'Ссылка']
+        headers.extend(data[0]['techs'].keys())
+
+        for col, h in enumerate(headers):
+            ws.write_string(0, col, h, cell_format=bold)
+
+        for row, item in enumerate(data, start=1):
+            ws.write_string(row, 0, item['name'])
+            ws.write_string(row, 1, item['amount'])
+            ws.write_string(row, 2, item['url'])
+            for prop_name, prop_value in item['techs'].items():
+                col = headers.index(prop_name)
+                ws.write_string(row, col, prop_value)
 
 
 def get_soup(url, **kwargs):
@@ -56,7 +89,7 @@ def parse_products(urls):
     data = []
 
     for url in urls:
-        print('product: {}'.format(url))
+        print('\tproduct: {}'.format(url))
 
         soup = get_soup(url)
         if soup is None:
@@ -74,6 +107,7 @@ def parse_products(urls):
             'name': name,
             'amount': amount,
             'techs': techs,
+            'url': url,
         }
         data.append(item)
 
@@ -83,11 +117,10 @@ def parse_products(urls):
 def main():
     urls = crawl_products(PAGES_COUNT)
     data = parse_products(urls)
-
-    with open(OUT_FILENAME, 'w') as f:
-        json.dump(data, f, ensure_ascii=False, indent=1)
+    dump_to_json(OUT_FILENAME, data)
+    dump_to_xlsx(OUT_XLSX_FILENAME, data)
+    
 
 
 if __name__ == '__main__':
     main()
-
