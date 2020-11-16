@@ -119,8 +119,8 @@ def send_document(filename, token, chat_id):
     Отправка файла в чат Telegram.
     :filename:              имя файла для отправки.
     :token:                 токен от Telegram-бота.
-    'chat_id':              ID чата, куда будет отправлен файл.
-    :return:                успешность отправки True/False.
+    :chat_id:               ID чата, куда будет отправлен файл.
+    :return:                успешность отправки – True/False.
     """
     url = 'https://api.telegram.org/bot{}/sendDocument'.format(token)
     data = {'chat_id': chat_id, 'caption': 'Результат парсинга'}
