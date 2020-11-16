@@ -9,6 +9,8 @@ from bs4 import BeautifulSoup
 PAGES_COUNT = 10
 OUT_FILENAME = 'out.json'
 OUT_XLSX_FILENAME = 'out.xlsx'
+TELEGRAM_TOKEN = ''
+CHAT_ID = ''
 
 
 def dump_to_json(filename, data, **kwargs):
@@ -54,7 +56,6 @@ def get_soup(url, **kwargs):
 def crawl_products(pages_count):
     """
     Собирает со страниц с 1 по pages_count включительно ссылки на товары.
-
     :param pages_count:     номер последней страницы с товарами.
     :return:                список URL товаров.
     """
@@ -82,7 +83,6 @@ def parse_products(urls):
     Парсинг полей:
         название, цена и таблица характеристик
     по каждому товару.
-
     :param urls:            список URL на карточки товаров.
     :return:                массив спарсенных данных по каждому из товаров.
     """
@@ -114,12 +114,29 @@ def parse_products(urls):
     return data
 
 
+def send_document(filename, token, chat_id):
+    """
+    Отправка файла в чат Telegram.
+    :filename:              имя файла для отправки.
+    :token:                 токен от Telegram-бота.
+    'chat_id':              ID чата, куда будет отправлен файл.
+    :return:                успешность отправки True/False.
+    """
+    url = 'https://api.telegram.org/bot{}/sendDocument'.format(token)
+    data = {'chat_id': chat_id, 'caption': 'Результат парсинга'}
+    with open(filename, 'rb') as f:
+        files = {'document': f}
+        response = requests.post(url, data=data, files=files)
+        return response.json()['ok']
+
+
 def main():
     urls = crawl_products(PAGES_COUNT)
     data = parse_products(urls)
     dump_to_json(OUT_FILENAME, data)
     dump_to_xlsx(OUT_XLSX_FILENAME, data)
-    
+    send_document(OUT_FILENAME, TELEGRAM_TOKEN, CHAT_ID)
+    send_document(OUT_XLSX_FILENAME, TELEGRAM_TOKEN, CHAT_ID)
 
 
 if __name__ == '__main__':
