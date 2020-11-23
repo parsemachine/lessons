@@ -17,7 +17,7 @@ def dump_to_json(filename, data, **kwargs):
     kwargs.setdefault('ensure_ascii', False)
     kwargs.setdefault('indent', 1)
     
-    with open(OUT_FILENAME, 'w') as f:
+    with open(filename, 'w') as f:
         json.dump(data, f, **kwargs)
 
 
